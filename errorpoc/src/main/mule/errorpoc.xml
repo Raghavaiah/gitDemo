@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="e15e6a27-efac-4231-8bf0-f5c7e1cf6719" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="4c320c6b-109b-4735-b73a-d0aa96edb476" basePath='#["/question/"]' >
+		<http:request-connection protocol="HTTPS" host='#["help.mulesoft.com"]' />
+	</http:request-config>
+	<flow name="onErrorContinue" doc:id="f865cc35-3715-4e04-912f-dd4dc6fe4c7d" >
+		<http:listener doc:name="Listener" doc:id="f8acdc3c-33cd-4e01-9330-34f0d637a0a9" path="/continue" config-ref="HTTP_Listener_config"/>
+		<set-payload value="#[%dw 2.0&#10;output application/json&#10;---&#10;Mule::lookup('errorpocFlow',payload)]" doc:name="Set Payload" doc:id="fbe74a92-d0a0-4dd7-b585-2ff166733a52" />
+		<set-variable value='#[payload]' doc:name="Set Variable" doc:id="5aedee74-d436-4c72-aa64-99af6c5b90b8" variableName="variable" />
+		<set-payload value='#["none"]' doc:name="Set Payload" doc:id="9e107351-c507-4d01-89e0-79cd3cdecdae" />
+	</flow>
+	<flow name="OnErrorPropogate" doc:id="6c73a605-0475-4df8-9d5c-53d964c04c44" >
+		<http:listener doc:name="Listener" doc:id="00903275-fcf7-4e8f-b022-5aa398eaced8" config-ref="HTTP_Listener_config" path="/propogate"/>
+		<flow-ref doc:name="Flow Reference" doc:id="aff8abdc-3ca6-49eb-a51c-1858a8b4eccd" name="errorpocFlow"/>
+		<set-variable value='#[payload]' doc:name="Set Variable" doc:id="8c1f42d5-ce05-42c7-8d5b-dd875d74a867" variableName="variable" />
+		<set-payload value="#[payload]" doc:name="Set Payload" doc:id="a3e9285a-02d7-4682-b9fa-4d6e30993d5e" />
+		<error-handler>
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="Copy_of_On Error Propagate" doc:id="900f1cbe-eea9-4574-bdcd-afbc24df9665" type="ANY">
+				<set-payload value='#["Error error propogate"]' doc:name="Copy_of_Set Payload" doc:id="071439c8-0223-40b6-b6e7-da865d76a021" />
+				<logger level="INFO" doc:name="Copy_of_Logger" doc:id="2106445c-7b60-4e55-a9c5-824b804c7904" message="#[error.description]" />
+			</on-error-propagate>
+		</error-handler>
+	</flow>
+	<flow name="errorpocFlow" doc:id="1713c3b0-7bb2-414e-9e8c-a4fe3c004da1" >
+		<http:request method="POST" doc:name="Request" doc:id="b8145bfa-de94-40a2-9433-f0d8e7ea5308" config-ref="HTTP_Request_configuration" path='#["0D52T00005D7OW7SAN/hi-im-completing-the-mule-4-fundamentals-course-and-have-some-questions-on-error-handling-im-a-bit-confused-on-the-reasoning-behind-each-of-the-answers-below-if-someone-could-advise-on-the-reasoning-for-the-answers-it-would-be-much-appreciated"]' />
+		<error-handler>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="Copy_of_On Error Continue" doc:id="0f127b62-807d-4cf9-b2c4-df55c1a1df8e" type="ANY" >
+				<set-payload value='#["Error error"]' doc:name="Copy_of_Set Payload" doc:id="f5cb45ed-0526-41c1-a70f-d22a86235270" />
+				<logger level="INFO" doc:name="Copy_of_Logger" doc:id="97ca4ddb-b219-4ad6-a7aa-f0869ae01c39" message="#[error.description]" />
+			</on-error-continue>
+		</error-handler>
+	</flow>
+</mule>
