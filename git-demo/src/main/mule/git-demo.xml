@@ -10,5 +10,6 @@ http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/htt
 	<flow name="git-demoFlow" doc:id="7b606144-8a17-4caf-ac02-52ef97724034" >
 		<http:listener doc:name="Listener" doc:id="83c4284d-84de-4f23-8d76-174f35e4f98a" config-ref="HTTP_Listener_config" path="git"/>
 		<logger level="INFO" doc:name="Logger" doc:id="cc337c21-20e7-4dde-8908-3932f02331e8" message="#[%dw 2.0&#10;output application/json&#10;---&#10;{&#10;	application:app.name,&#10;	flow:flow.name&#10;}]"/>
+		<set-payload value='#["hello world&#10;"]' doc:name="Set Payload" doc:id="b7a7335b-e0f1-4a40-a37e-2ce927eda3fb" />
 	</flow>
 </mule>
